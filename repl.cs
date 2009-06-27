@@ -109,7 +109,7 @@ namespace Mono {
 			}
 
 			if (show_help) {
-				Console.WriteLine ("Usage: csi [OPTIONS]+ [<source>] [-- [script args]]");
+				Console.WriteLine ("Usage: csi [OPTIONS]+ [<source>] [-s [script args]]");
 				Console.WriteLine ();
 				options.WriteOptionDescriptions (Console.Out);
 				return 1;
@@ -133,29 +133,12 @@ namespace Mono {
 				return 1;
 			}
 
-			string evaluate = null;
 
 			if (options.ScriptFile != null) {
-				var builder = new System.Text.StringBuilder ();
-				builder.Append ("string [] __args__ = new string [] { ");
-				
-				foreach (var script_arg in options.ScriptArguments) {
-					// FIXME: proper escaping
-					builder.Append ('"');
-					builder.Append (CSharpShell.EscapeString (script_arg));
-					builder.Append ('"');
-					builder.Append (',');
-				}
-				
-				builder.Append ('}');
-				evaluate = builder.ToString ();
+				InteractiveBaseShell.CommandLineArgs = options.ScriptArguments;
 			}
 
-			var shell = new CSharpShell ();
-			if (evaluate != null) {
-				shell.Evaluate (evaluate);
-			}
-			return shell.Run (startup_files);
+			return new CSharpShell ().Run (startup_files);
 		}
 	}
 
@@ -180,6 +163,8 @@ namespace Mono {
 					Editor.TabAtStartCompletes = value;
 			}
 		}
+
+        public static List<string> CommandLineArgs { get; internal set; }
 
 		public static new string help {
 			get {
@@ -378,7 +363,6 @@ namespace Mono {
 			object result;
 
 			try {
-				Console.WriteLine (input);
 				input = Evaluator.Evaluate (input, out result, out result_set);
 
 				if (result_set){

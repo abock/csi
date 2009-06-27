@@ -1,6 +1,7 @@
 #!/usr/bin/csi -s
 
-foreach (var arg in __args__) {
+Console.WriteLine ("Total arguments: {0}", CommandLineArgs.Count);
+
+foreach (string arg in CommandLineArgs) {
     Console.WriteLine (arg);
 }
-
